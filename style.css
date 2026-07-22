@@ -1,0 +1,15 @@
+.FontCenterChange {
+    text-align: center;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 3.5rem;
+
+}
+body {
+    background:aquamarine;
+}
+.SmallerFontCenter
+{
+    text-align: center;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 3rem;
+}
