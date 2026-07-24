@@ -24,6 +24,16 @@ body {
 }
 
 /* Button Stuff */
+/* Card layout container */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;          /* allows wrapping when needed */
+    gap: 1.5rem;              /* smooth spacing between cards */
+    justify-content: center;  /* centers cards horizontally */
+    padding: 1rem;
+}
+
+/* Your existing card styles stay the same */
 .card {
   --bg-card: #27272a;
   --primary: #6d28d9;
@@ -34,7 +44,6 @@ body {
   --bg-linear: linear-gradient(0deg, var(--primary) 50%, var(--light) 125%);
 
   position: relative;
-
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -42,9 +51,9 @@ body {
   padding: 1rem;
   width: 14rem;
   background-color: var(--bg-card);
-
   border-radius: 1rem;
 }
+
 
 .image_container {
   overflow: hidden;
@@ -164,3 +173,28 @@ body {
   width: 1rem;
 }
 /* Button stuff ends here */
+/* Search Bar Stuff */
+.search-input {
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+    padding: 0.75rem 1rem;
+    width: 60%;
+    max-width: 400px;
+
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid #ffffff80;
+    background: #ffffff20;
+    color: white;
+    text-align: center;
+
+    outline: none;
+    transition: 0.2s;
+}
+
+.search-input:focus {
+    border-color: cyan;
+    background: #3ecc45;
+}
+/* Search Bar Stuff Ends Here */

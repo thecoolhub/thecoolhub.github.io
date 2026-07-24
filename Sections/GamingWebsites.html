@@ -11,7 +11,31 @@
         <h1 class="FontCenterChange"> A Place Of Gaming Websites! </h1>
         <a href="../"><h3 class="FontCenterChange">Click to go back</h3></a>
         <p class="SmallerFontCenter">Welcome To A Place Of Gaming Websites</p>
-        <a href="../hello1405"><div class="card"><div class="image_container"><img src="../images/hello1405.png" class="image"></div><div class="title"><span>Hello1405</span></div></div></a>
+        <input type="text" id="searchBar" placeholder="Search websites..." class="search-input">
+        <div class="card-container">
+     <!-- This is where the buttons are on the website -->
+    <a href="../hello1405"><div class="card"><div class="image_container"><img src="../images/hello1405.png" class="image"></div><div class="title"><span>Hello1405</span></div></div></a>
+    <a href="../Learning"><div class="card"><div class="image_container"><img src="../images/NoodleToolsHelper.png" class="image"></div><div class="title"><span>Noodle Tools Helper (Gaming Website)</span></div></div></a>
+      
+      
+      
+      
+      
+      
+      <script>
+    const searchBar = document.getElementById("searchBar");
+    const cards = document.querySelectorAll(".card");
+
+    searchBar.addEventListener("input", () => {
+        const query = searchBar.value.toLowerCase();
+
+        cards.forEach(card => {
+            const title = card.querySelector(".title span").textContent.toLowerCase();
+            card.parentElement.style.display = title.includes(query) ? "" : "none";
+        });
+    });
+</script>
+       </div>
 
     </body>
 </html>
