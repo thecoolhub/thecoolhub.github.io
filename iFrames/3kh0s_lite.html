@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Learning Stuff</title>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #gameFrame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+<iframe
+    id="gameFrame"
+    allowfullscreen>
+</iframe>
+
+<script>
+(async function () {
+
+    const GAME_SITE =
+        "https://thecoolhub2.github.io/games/index.html";
+
+    const frame = document.getElementById("gameFrame");
+
+    try {
+        // --------------------------------------------------
+        // 1. Download the original HTML
+        // --------------------------------------------------
+
+        const response = await fetch(GAME_SITE, {
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            throw new Error(
+                "HTTP " + response.status + " " + response.statusText
+            );
+        }
+
+        let html = await response.text();
+
+        // --------------------------------------------------
+        // 2. Parse it as a REAL HTML document
+        // --------------------------------------------------
+
+        const parser = new DOMParser();
+
+        const doc = parser.parseFromString(
+            html,
+            "text/html"
+        );
+
+        // --------------------------------------------------
+        // 3. Make relative URLs work
+        // --------------------------------------------------
+
+        const base = doc.createElement("base");
+
+        base.href = new URL(
+            GAME_SITE
+        ).href;
+
+        doc.head.prepend(base);
+
+        // --------------------------------------------------
+        // 4. Remove target="_blank" from links
+        //
+        //    This happens INSIDE the copied document.
+        // --------------------------------------------------
+
+        doc.querySelectorAll(
+            'a[target="_blank"]'
+        ).forEach(link => {
+
+            link.removeAttribute("target");
+
+        });
+
+        // --------------------------------------------------
+        // 5. Inject navigation controller
+        // --------------------------------------------------
+
+        const navigationScript = doc.createElement("script");
+
+        navigationScript.textContent = `
+
+            (() => {
+
+                // ------------------------------------------
+                // Make _blank links stay inside this iframe
+                // ------------------------------------------
+
+                document.addEventListener(
+                    "click",
+                    function(event) {
+
+                        const link =
+                            event.target.closest("a");
+
+                        if (!link) return;
+
+                        const href =
+                            link.getAttribute("href");
+
+                        if (!href) return;
+
+                        // Ignore special links
+                        if (
+                            href.startsWith("#") ||
+                            href.startsWith("javascript:") ||
+                            href.startsWith("mailto:") ||
+                            href.startsWith("tel:")
+                        ) {
+                            return;
+                        }
+
+                        // Navigate the iframe normally
+                        if (
+                            link.target === "_blank" ||
+                            link.target === "_new"
+                        ) {
+
+                            event.preventDefault();
+
+                            window.location.href =
+                                link.href;
+                        }
+
+                    },
+                    true
+                );
+
+
+                // ------------------------------------------
+                // Catch window.open()
+                // ------------------------------------------
+
+                const originalOpen =
+                    window.open;
+
+                window.open = function(
+                    url,
+                    target,
+                    features
+                ) {
+
+                    if (url) {
+
+                        window.location.href = url;
+
+                        return window;
+
+                    }
+
+                    return null;
+                };
+
+
+                // ------------------------------------------
+                // Make dynamically-created _blank links
+                // work too.
+                // ------------------------------------------
+
+                const observer =
+                    new MutationObserver(
+                        function(mutations) {
+
+                            for (
+                                const mutation
+                                of mutations
+                            ) {
+
+                                for (
+                                    const node
+                                    of mutation.addedNodes
+                                ) {
+
+                                    if (
+                                        node.nodeType !== 1
+                                    ) {
+                                        continue;
+                                    }
+
+                                    if (
+                                        node.matches &&
+                                        node.matches(
+                                            'a[target="_blank"]'
+                                        )
+                                    ) {
+
+                                        node.removeAttribute(
+                                            "target"
+                                        );
+                                    }
+
+                                    if (
+                                        node.querySelectorAll
+                                    ) {
+
+                                        node
+                                            .querySelectorAll(
+                                                'a[target="_blank"]'
+                                            )
+                                            .forEach(
+                                                link => {
+                                                    link.removeAttribute(
+                                                        "target"
+                                                    );
+                                                }
+                                            );
+                                    }
+                                }
+                            }
+                        }
+                    );
+
+                observer.observe(
+                    document.documentElement,
+                    {
+                        childList: true,
+                        subtree: true
+                    }
+                );
+
+            })();
+
+        `;
+
+        // Put our script at the beginning of body
+        if (doc.body) {
+            doc.body.prepend(navigationScript);
+        } else {
+            doc.documentElement.appendChild(
+                navigationScript
+            );
+        }
+
+        // --------------------------------------------------
+        // 6. Serialize the COMPLETE modified document
+        // --------------------------------------------------
+
+        const modifiedHTML =
+            "<!DOCTYPE html>\n" +
+            doc.documentElement.outerHTML;
+
+        // --------------------------------------------------
+        // 7. Turn it into a real browser document
+        // --------------------------------------------------
+
+        const blob = new Blob(
+            [modifiedHTML],
+            {
+                type: "text/html"
+            }
+        );
+
+        const blobURL =
+            URL.createObjectURL(blob);
+
+        // --------------------------------------------------
+        // 8. Load the copied document in the iframe
+        // --------------------------------------------------
+
+        frame.src = blobURL;
+
+        // --------------------------------------------------
+        // Clean up when the wrapper is unloaded
+        // --------------------------------------------------
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+                URL.revokeObjectURL(blobURL);
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load games page:",
+            error
+        );
+
+        document.body.innerHTML = `
+            <div style="
+                font-family: Arial, sans-serif;
+                padding: 30px;
+                color: white;
+                background: #111;
+                height: 100vh;
+                box-sizing: border-box;
+            ">
+                <h1>Failed to load games</h1>
+
+                <p>
+                    ${error.message}
+                </p>
+
+                <p>
+                    Open the browser console for more details.
+                </p>
+            </div>
+        `;
+    }
+
+})();
+</script>
+
+</body>
+</html>
